@@ -1,6 +1,6 @@
 # Generator
 
-Generator is an application which creates static websites resembling a wiki from markdown files. Here's how it looks as an example:
+Generator is an application which creates static websites resembling a wiki from markdown files. You can view a live demo of the latest build at [https://cryru.github.io/Generator/](https://cryru.github.io/Generator/)
 
 <img src="Documentation/example.PNG">
 
