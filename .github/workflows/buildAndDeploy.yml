@@ -1,0 +1,46 @@
+name: CI-Windows
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+
+    runs-on: windows-2019
+    
+    steps:
+    - uses: actions/checkout@master
+    - name: net core 3.0
+      run: choco install dotnetcore-sdk --pre
+    - name: Build
+      run: |
+        dotnet publish -c Release -o .\bin\publish-win64 --self-contained -r win-x64
+        cd .\bin\
+        7z a -tzip ReleaseWin64.zip publish-win64\*
+        cd .\publish-win64\
+        mkdir Source
+        xcopy .\..\..\TestSource\* .\Source /Y /E
+        .\Generator.exe
+        xcopy .\Output\* .\..\..\docs /Y /E
+    - name: Upload Artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: Release
+        path: bin\ReleaseWin64.zip
+    - name: Upload Release
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: bin\ReleaseWin64.zip
+        asset_name: ReleaseWin64.zip
+        tag: ${{ github.ref }}
+        overwrite: true
+    - name: Update Demo Page
+      uses: matheusalbino/git-commit@v1.0.0
+      with:
+        user-name: GitHubBot
+        user-email: github@github.com
+        message: Updated static files!
+        github-token: ${{ secrets.GITHUB_TOKEN }}

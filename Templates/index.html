@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>[Title]</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./stylesheet.css" type="text/css">
+</head>
+<body>
+<iframe src="./navigator.html" class="navigatorContainer"></iframe>
+<div class="fileContainer">
+    <iframe id="file"></iframe>
+</div>
+<script>
+    window.addEventListener("message", message, false);
+    var documentHolder = document.getElementById("file");
+
+    function GetURLParameter(sParam) {
+        const sPageUrl = window.location.search.substring(1);
+        const sUrlVariables = sPageUrl.split('&');
+        for (let i = 0; i < sUrlVariables.length; i++) {
+            const sParameterName = sUrlVariables[i].split('=');
+            if (sParameterName[0] == sParam) {
+                return sParameterName[1];
+            }
+        }
+    }
+
+    function message(event) {
+        const data = event.data;
+        const dataSplit = data.split('$');
+        if (dataSplit.length !== 2 || dataSplit[0] !== 'navigate') return;
+
+        console.log("Navigating to: " + dataSplit[1]);
+        documentHolder.setAttribute("src", dataSplit[1]);
+        window.history.replaceState(null, null, `?link=${dataSplit[1]}`);
+        window.document.title = "[Title] - " + dataSplit[1];
+    }
+
+    var startingLink = GetURLParameter("link");
+    if (startingLink) {
+        console.dir("Found starting link: " + startingLink);
+        documentHolder.setAttribute("src", startingLink);
+        window.document.title = "[Title] - " + dataSplit[1];
+    }
+</script>
+</body>
+</html>

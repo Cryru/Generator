@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Navigation</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./treeview.css" type="text/css">
+    <link rel="stylesheet" href="./stylesheet.css" type="text/css">
+</head>
+<body class="navigator">
+    <ul class="main-ul">
+        <li>[Navigator]</li>
+    </ul>
+<script>
+    var links = document.getElementsByClassName("link");
+    for (var i = 0; i < links.length; i++) {
+        const link = links[i].getAttribute("link");
+        links[i].addEventListener("click",
+            function(e) {
+                window.parent.postMessage("navigate$" + link, "*");
+                e.stopPropagation();
+            });
+    }
+
+    var carets = document.getElementsByClassName("caret");
+    for (var i = 0; i < carets.length; i++) {
+        carets[i].addEventListener("click",
+            function(e) {
+                this.parentElement.querySelector(".active").classList.toggle("nested");
+                this.classList.toggle("caret-down");
+            });
+    }
+</script>
+</body>
+</html>
