@@ -1,0 +1,48 @@
+/* Style the caret/arrow */
+
+ul {
+    list-style-type: none;
+    padding: 0 0 0 1em;
+    margin: 0;
+}
+
+.main-ul {
+    padding: 0;
+}
+
+/* UL State */
+
+.nested {
+    display: none !important;
+}
+
+.active {
+    display: block;
+}
+
+/* Arrow which rotates */
+
+.caret {
+    cursor: pointer;
+    user-select: none;
+}
+
+.caret::before {
+    color: black;
+    content: "\1f847";
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.caret-down::before {
+    content: "\1f846";
+}
+
+.fake-caret {
+    user-select: none;
+    margin-right: 6px;
+    margin-left: 6px;
+    content: "\2BC4";
+    display: inline-block;
+    font-size: 0.5em;
+}
