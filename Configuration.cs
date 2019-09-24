@@ -1,5 +1,24 @@
-﻿namespace Generator
+﻿using System.Collections.Generic;
+
+namespace Generator
 {
+    public class Tag
+    {
+        public string Key { get; set; }
+        public string Value { get; set; }
+
+        public Tag()
+        {
+
+        }
+
+        public Tag(string key, string value)
+        {
+            Key = key;
+            Value = value;
+        }
+    }
+
     public class Configuration
     {
         /// <summary>
@@ -31,5 +50,10 @@
         /// The name of the wiki.
         /// </summary>
         public string WikiTitle { get; set; } = "Wiki";
+
+        /// <summary>
+        /// List of custom tags to replace in files.
+        /// </summary>
+        public List<Tag> CustomTags { get; set; } = new List<Tag>() { new Tag("[Example]", "Example") };
     }
 }

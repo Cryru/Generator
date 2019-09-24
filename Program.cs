@@ -192,6 +192,12 @@ namespace Generator
 
             for (int i = 0; i < contents.Length; i++)
             {
+                // Replace with custom tags.
+                foreach (Tag tag in Settings.CustomTags)
+                {
+                    contents[i] = contents[i].Replace(tag.Key, tag.Value);
+                }
+
                 // Look for links.
                 Match match = _linkFinder.Match(contents[i]);
                 if (match.Success)
@@ -309,12 +315,12 @@ namespace Generator
             string htmlMarkdown = Markdown.ToHtml(string.Join("\n", fileInfo.Contents), MarkDigPipeline);
             newFileContent.Insert(_markdownTemplateInsertionIndex, htmlMarkdown);
 
-            // Perform additional processing on html.
-            var processingTags = new Dictionary<string, string>
+            // Perform additional processing on html to insert relative paths to the template.
+            for (int i = 0; i < newFileContent.Count; i++)
             {
-                {"[RelativePath]", Path.GetRelativePath(Path.GetDirectoryName(fileInfo.FileName), Settings.OutputDirectory).Replace("\\", "/")}
-            };
-            FindReplaceTags(newFileContent, processingTags);
+                newFileContent[i] = newFileContent[i].Replace("[RelativePath]", Path.GetRelativePath(Path.GetDirectoryName(fileInfo.FileName), Settings.OutputDirectory).Replace("\\", "/"));
+            }
+
             fileInfo.Contents = newFileContent.ToArray();
 
             return fileInfo;
@@ -338,23 +344,6 @@ namespace Generator
             };
             FindReplaceTags(fileInfo.Contents, processingTags);
             return fileInfo;
-        }
-
-        /// <summary>
-        /// Finds the provided list of tags (keys) within the content list and replaces them with their values.
-        /// </summary>
-        /// <param name="content">The content to look in.</param>
-        /// <param name="tags">The tags to replace.</param>
-        private static void FindReplaceTags(List<string> content, Dictionary<string, string> tags)
-        {
-            // Find and replace all specified tags with their values.
-            for (int i = 0; i < content.Count; i++)
-            {
-                foreach ((string key, string value) in tags.Where(tag => content[i].Contains(tag.Key)))
-                {
-                    content[i] = content[i].Replace(key, value);
-                }
-            }
         }
 
         /// <summary>
