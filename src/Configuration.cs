@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿#region Using
+
+using System.Collections.Generic;
+
+#endregion
 
 namespace Generator
 {
@@ -9,7 +13,6 @@ namespace Generator
 
         public Tag()
         {
-
         }
 
         public Tag(string key, string value)
@@ -54,6 +57,9 @@ namespace Generator
         /// <summary>
         /// List of custom tags to replace in files.
         /// </summary>
-        public List<Tag> CustomTags { get; set; } = new List<Tag>() { new Tag("[Example]", "Example") };
+        public List<Tag> CustomTags { get; set; } = new List<Tag>
+        {
+            new Tag("[Example]", "Example")
+        };
     }
 }

@@ -1,15 +1,39 @@
-html * { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important; }
+html * {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important;
+}
 
-iframe { border: none; }
+iframe {
+    border: none;
+}
+
+.mainPageBody {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    margin: 0;
+}
+
+.wikiContent {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    height: 100%;
+    width: 100%;
+    border-bottom: 1px solid #292b2e;
+}
 
 .navigatorContainer {
     border-right: 1px solid #292b2e;
     box-sizing: border-box;
-    height: 100%;
-    left: 0;
-    position: absolute;
-    top: 0;
+    display: block;
     width: 20%;
+}
+
+.fileContainer {
+    width: 100%
 }
 
 .navigator {
@@ -17,17 +41,21 @@ iframe { border: none; }
     margin: 1em 0 0 1em;
 }
 
-.fileContainer {
-    height: 100%;
-    left: 20%;
-    position: absolute;
-    top: 0px;
-    width: 80%;
+.footer {
+    margin: 8px;
+}
+
+.footer:empty {
+    margin: 0;
 }
 
 #file {
     height: 100%;
     width: 100%;
+}
+
+.caret {
+    font-weight: 600;
 }
 
 .link {

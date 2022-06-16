@@ -11,25 +11,28 @@
     <ul class="main-ul">
         <li>[Navigator]</li>
     </ul>
-<script>
-    var links = document.getElementsByClassName("link");
-    for (var i = 0; i < links.length; i++) {
-        const link = links[i].getAttribute("link");
-        links[i].addEventListener("click",
-            function(e) {
-                window.parent.postMessage("navigate$" + link, "*");
-                e.stopPropagation();
-            });
-    }
+	<script>
+	    var links = document.getElementsByClassName("link");
+	    for (var i = 0; i < links.length; i++) {
+		    const link = links[i];
+	        const linkAttr = link.getAttribute("link");
+            if (linkAttr) {
+	            link.addEventListener("click",
+		            function(e) {
+			            window.parent.postMessage("navigate$" + linkAttr, "*");
+			            e.stopPropagation();
+		            });
+            }
+	    }
 
-    var carets = document.getElementsByClassName("caret");
-    for (var i = 0; i < carets.length; i++) {
-        carets[i].addEventListener("click",
-            function(e) {
-                this.parentElement.querySelector(".active").classList.toggle("nested");
-                this.classList.toggle("caret-down");
-            });
-    }
-</script>
+	    var carets = document.getElementsByClassName("caret");
+	    for (var i = 0; i < carets.length; i++) {
+	        carets[i].addEventListener("click",
+	            function(e) {
+	                this.parentElement.querySelector(".active").classList.toggle("nested");
+	                this.classList.toggle("caret-down");
+	            });
+	    }
+	</script>
 </body>
 </html>

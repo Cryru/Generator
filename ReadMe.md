@@ -6,13 +6,15 @@ Generator is an application which creates static websites resembling a wiki from
 
 ## Usage
 
-*Get the latest release from the "Releases" section.*
+*Get the latest release from the ["Releases"](https://github.com/Cryru/Generator/releases) section.*
 
-To use the application place your folder with markdown files in the same directory as the application and name it "Source". The path to this folder can be configured, refer to the "Configuration" section. Once placed there launch Generator.exe and you'll have a new folder called "Output" with your generated wiki (hopefully).
+Create a folder named "Source" and place your markdown files inside. The application .exe should be in the same folder as the "Source" folder. The name and path of this folder can be configured, refer to the "Configuration" section. Run Generator.exe and you'll have a new folder called "Output" with your generated wiki (hopefully).
 
-Nodes will be generated from the folder structure inside your source folder, you can control the order by placing an "order.txt" file in the folder and listing the names of the files in the order you want them to appear. The markdown file for the folder node itself is read from a "Folder.md" if any.
+Pages will be generated from the folder structure inside your "Source"" folder, you can control the order by placing an "order.txt" file in the folder and listing the names of the files in the order you want them to appear. The markdown file for the folder node itself is read from a "Folder.md" if any.
 
 If you launch "Generator.exe sentry" from the command line the generator will launch in "sentry mode", rebuilding the output directory when it detects a file has changed or has been added/removed from the source directory. 
+
+For an example check the Documentation/DemoSource folder in the repo.
 
 ## Configuration
 

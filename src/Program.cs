@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Serialization;
 using Markdig;
 
@@ -18,7 +20,7 @@ namespace Generator
     {
         public static Configuration Settings;
         public static MarkdownPipeline MarkDigPipeline;
-        public static string[] SkippedFiles = { "order.txt" };
+        public static string[] IgnoreFiles = {"order.txt"};
 
         public static void Main(string[] args)
         {
@@ -29,7 +31,7 @@ namespace Generator
             if (File.Exists("settings.xml"))
             {
                 using FileStream fileStream = File.OpenRead("settings.xml");
-                Settings = (Configuration)serializer.Deserialize(fileStream);
+                Settings = (Configuration) serializer.Deserialize(fileStream);
                 Console.WriteLine("Settings loaded!");
             }
 
@@ -38,7 +40,9 @@ namespace Generator
                 Settings = new Configuration();
                 Console.WriteLine("Couldn't read settings file, creating one with default settings.");
                 using FileStream fileStream = File.Create("settings.xml");
-                serializer.Serialize(fileStream, Settings);
+                using var writer = new XmlTextWriter(fileStream, Encoding.Unicode);
+                writer.Formatting = Formatting.Indented;
+                serializer.Serialize(writer, Settings);
             }
 
             // Build markdown pipeline.
@@ -46,10 +50,10 @@ namespace Generator
 
             Build();
 
-            if (args.Length > 0 && args[0] == "sentry")
-            {
-                SentrySetup();
-            }
+            if (args.Length > 0 && args[0] == "sentry") SentrySetup();
+
+            Console.WriteLine("Done. Press any key to quit.");
+            Console.ReadKey();
         }
 
         private static void Build()
@@ -62,13 +66,13 @@ namespace Generator
             if (masterNode == null) return;
 
             // Copy source and template.
-            Console.WriteLine("Copying files to output...");
+            Console.WriteLine("Copying template and source files to output...");
             CopyFolderToFolder(Settings.SourcePath, Settings.OutputDirectory + Settings.SourceOutput, fi => ProcessFile(PreprocessFile(fi, masterNode)));
             CopyFolderToFolder(Settings.TemplateDirectory, Settings.OutputDirectory, fi => ProcessHTMLTags(fi));
 
             // Generate list for navigator.
             Console.WriteLine("Creating navigation...");
-            const string navigationTemplate = ".\\Output\\navigator.html";
+            string navigationTemplate = $"{Settings.OutputDirectory}\\navigator.html";
             List<string> navigationFileHtml = File.ReadAllLines(navigationTemplate).ToList();
             for (int i = 0; i < navigationFileHtml.Count; i++)
             {
@@ -107,6 +111,7 @@ namespace Generator
             string[] files = Directory.GetFiles(directoryPath);
             string[] directories = Directory.GetDirectories(directoryPath);
 
+            Array.Sort(files);
             foreach (string file in files)
             {
                 string fileName = Path.GetFileName(file);
@@ -115,8 +120,9 @@ namespace Generator
                     node.File = Path.Join(directoryPath, "Folder.md");
                     continue;
                 }
+
                 // Check if file is being skipped.
-                if (SkippedFiles.FirstOrDefault(x => x == fileName) != null) continue;
+                if (IgnoreFiles.FirstOrDefault(x => x == fileName) != null) continue;
 
                 var newNode = new Node
                 {
@@ -127,6 +133,7 @@ namespace Generator
                 node.Children.Add(newNode);
             }
 
+            Array.Sort(directories);
             foreach (string dir in directories)
             {
                 node.Children.Add(GetDirectoryNode(dir));
@@ -136,7 +143,13 @@ namespace Generator
             string orderFile = Path.Join(directoryPath, "order.txt");
             if (!File.Exists(orderFile)) return node;
             string[] order = File.ReadAllLines(orderFile);
-            node.Children = node.Children.OrderBy(x => Array.IndexOf(order, x.Name)).ToList();
+
+            node.Children.Sort((x, y) =>
+            {
+                var indexOfX = Array.IndexOf(order, x.Name);
+                var indexOfY = Array.IndexOf(order, y.Name);
+                return indexOfX - indexOfY;
+            });
 
             return node;
         }
@@ -201,7 +214,6 @@ namespace Generator
                 // Look for links.
                 Match match = _linkFinder.Match(contents[i]);
                 if (match.Success)
-                {
                     while (match.Success)
                     {
                         string linkText = match.Groups[1].Value;
@@ -212,15 +224,14 @@ namespace Generator
                         string linkOverwrite = null;
                         int matchEnd = match.Index + match.Length;
                         if (matchEnd < contents[i].Length - 1)
-                        {
                             // Link overwrite opening tag.
-                            if(contents[i][matchEnd] == '(')
+                            if (contents[i][matchEnd] == '(')
                             {
                                 // Find the closing bracket.
                                 linkOverwrite = "";
                                 int openingBracketsCount = 1;
                                 int pointer = matchEnd;
-                                while(pointer <= contents[i].Length - 1)
+                                while (pointer <= contents[i].Length - 1)
                                 {
                                     pointer++;
                                     char nextChar = contents[i][pointer];
@@ -234,7 +245,6 @@ namespace Generator
 
                                 matchEnd = pointer + 1;
                             }
-                        }
 
                         bool foundLink = nodeLookup.TryGetValue(string.IsNullOrEmpty(linkOverwrite) ? linkText : linkOverwrite, out Node referencedNode);
                         if (foundLink)
@@ -250,8 +260,7 @@ namespace Generator
                         contents[i] = contents[i].Substring(0, match.Index) + link + contents[i].Substring(matchEnd);
                         match = _linkFinder.Match(contents[i]);
                     }
-                }
-                
+
                 // Look for tabs.
                 match = _tabFinder.Match(contents[i]);
                 if (!match.Success) continue;
@@ -380,11 +389,13 @@ namespace Generator
             {
                 var html = new List<string>();
                 string childFileLink = TransformPathToWeb(child.File);
+                bool activeLink = File.Exists(child.File);
+                string linkAttribute = activeLink ? $"</span><span class=\"link\" link=\"{childFileLink}\">{child.Name}" : $"{child.Name}";
 
-                // Check if children further.
+                // Check further children.
                 if (child.Children.Count > 0)
                 {
-                    html.Add($"<li><span class=\"caret\"></span><span class=\"link\" link=\"{childFileLink}\">{child.Name}</span>");
+                    html.Add($"<li><span class=\"caret\">{linkAttribute}</span>");
                     html.Add("<ul class=\"active\">");
                     html.AddRange(GenerateList(child));
                     html.Add("</ul>");
@@ -392,7 +403,7 @@ namespace Generator
                 }
                 else
                 {
-                    html.Add($"<li><span class=\"fake-caret\">\u2BC4</span><span class =\"link\" link=\"{childFileLink}\">{child.Name}</span></li>");
+                    html.Add($"<li><span class=\"fake-caret\">\u2BC4 {linkAttribute}</span></li>");
                 }
 
                 list.AddRange(html);
@@ -411,7 +422,7 @@ namespace Generator
             string path = input.Replace(Settings.SourcePath, Settings.SourceOutput + Settings.WebPrefix);
             int extensionIndex = path.LastIndexOf('.');
             if (extensionIndex != -1)
-                return path.Substring(0, path.LastIndexOf('.')) +  ".html";
+                return path.Substring(0, path.LastIndexOf('.')) + ".html";
             return path;
         }
 
@@ -439,7 +450,7 @@ namespace Generator
             {
                 // Check if file is being skipped.
                 string fileName = Path.GetFileName(file);
-                if (SkippedFiles.FirstOrDefault(x => x == fileName) != null) continue;
+                if (IgnoreFiles.FirstOrDefault(x => x == fileName) != null) continue;
 
                 string destName = file.Replace(src, dst);
 

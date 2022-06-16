@@ -1,0 +1,1 @@
+I am a file inside that folder.
